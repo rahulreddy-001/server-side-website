@@ -2,7 +2,7 @@ const express = require("express");
 const Datastore = require("nedb");
 const app = express();
 app.use(express.static("Public"));
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "100mb" }));
 
 const database = new Datastore("database.db");
 database.loadDatabase();
@@ -13,6 +13,7 @@ app.get("/api", (req, res) => {
     res.json(data);
   });
 });
+
 app.post("/api", (req, res) => {
   let data = req.body;
   data.timestamp = new Date();

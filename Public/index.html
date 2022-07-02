@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/addons/p5.dom.min.js"></script>
     <title>Document</title>
   </head>
   <body>
@@ -16,44 +14,55 @@
       <p id="latitude"></p>
       <p id="longitude"></p>
     </div>
-    <button type="submit" id="submit">SUBMIT</button>
+    <video id="player" autoplay width="320" height="240"></video>
+    <!-- <canvas id="canvas" width="320" height="240"></canvas> -->
+    <button id="capture">Capture</button>
   </body>
   <script>
-    function setup() {
-      noCanvas();
-      const video = createCapture(VIDEO);
-      video.size(320, 240);
+    let coords;
+    if ("geolocation" in navigator) {
+      console.log("geolocation  available...");
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        document.getElementById("latitude").textContent = "Latitude : " + lat;
+        document.getElementById("longitude").textContent = "Longitude : " + lon;
 
-      let coords;
-      if ("geolocation" in navigator) {
-        console.log("geolocation  available...");
-        navigator.geolocation.getCurrentPosition((position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          document.getElementById("latitude").textContent = "Latitude : " + lat;
-          document.getElementById("longitude").textContent =
-            "Longitude : " + lon;
-
-          coords = { lat, lon };
-        });
-      } else {
-        console.log("geolocation not available...");
-      }
-
-      document.getElementById("submit").addEventListener("click", () => {
-        video.loadPixels();
-        const image64 = video.canvas.toDataURL();
-        let data = { coords, image64 };
-        fetch("/api", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        })
-          .then((resp) => resp.json())
-          .then((data) => console.log(data));
+        coords = { lat, lon };
       });
+    } else {
+      console.log("geolocation not available...");
     }
+
+    const player = document.getElementById("player");
+    const captureButton = document.getElementById("capture");
+
+    navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+      })
+      .then((stream) => {
+        player.srcObject = stream;
+      });
+
+    captureButton.addEventListener("click", () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = player.width;
+      canvas.height = player.height;
+      canvas
+        .getContext("2d")
+        .drawImage(player, 0, 0, canvas.width, canvas.height);
+      const image64 = canvas.toDataURL();
+      data = { coords, image64 };
+      fetch("/api", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((resp) => resp.json())
+        .then((data) => console.log(data));
+    });
   </script>
 </html>
