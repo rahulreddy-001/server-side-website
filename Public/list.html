@@ -8,7 +8,15 @@
   </head>
   <body>
     <h2>List of DB</h2>
-    <p><a href="index.html">enter</a> || <a href="list.html">list</a></p>
+    <hr />
+    <div>
+      <p><a href="index.html">enter</a> || <a href="list.html">list</a></p>
+      <hr />
+      <h3>Coordinates</h3>
+      <p id="latitude"></p>
+      <p id="longitude"></p>
+    </div>
+
     <script>
       const getData = async () => {
         let resp = await fetch("/api");
