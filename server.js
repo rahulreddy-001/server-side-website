@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const Datastore = require("nedb");
 const app = express();
 app.use(express.static("Public"));
